@@ -87,7 +87,7 @@ func (q *Queryer) Parse() (sql string, params []interface{}) {
 	}
 
 	if q.offset > 0 {
-		sql += "LIMIT ?,?"
+		sql += "OFFSET ? LIMIT ?"
 		params = append(params, q.offset, q.limit)
 	} else {
 		sql += "LIMIT ?"
