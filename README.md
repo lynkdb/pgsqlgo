@@ -1,5 +1,5 @@
-## postgrego
-postgrego is a Go Client for PostgreSQL.
+## pgsqlgo
+pgsqlgo is a Go Client for PostgreSQL.
 
 ## Usage
 

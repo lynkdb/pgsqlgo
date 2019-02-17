@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package postgrego
+package pgsqlgo
 
 import (
 	"fmt"
@@ -147,4 +147,8 @@ func (dc *Dialect) NewFilter() rdb.Filter {
 
 func (dc *Dialect) NewQueryer() rdb.Queryer {
 	return NewQueryer()
+}
+
+func (dc *Dialect) Close() {
+	dc.Base.Close()
 }

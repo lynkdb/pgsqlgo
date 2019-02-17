@@ -15,5 +15,5 @@
 			"revisionTime": "2016-05-10T22:24:21Z"
 		}
 	],
-	"rootPath": "github.com/lynkdb/postgrego"
+	"rootPath": "github.com/lynkdb/pgsqlgo"
 }
