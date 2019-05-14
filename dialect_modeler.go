@@ -206,7 +206,7 @@ func (dc *DialectModeler) IndexDump(tableName string) ([]*modeler.Index, error) 
 }
 
 func (dc *DialectModeler) ColumnTypeSql(table_name string, col *modeler.Column) string {
-	return dc.QuoteStr(col.Name) + " " + dialect_column_type_fmt(table_name, col)
+	return dc.QuoteStr(col.Name) + " " + dialectColumnTypeFmt(table_name, col)
 }
 
 func (dc *DialectModeler) ColumnSync(tableName string, col *modeler.Column) error {
@@ -220,7 +220,7 @@ func (dc *DialectModeler) ColumnSync(tableName string, col *modeler.Column) erro
 	}
 
 	sql := fmt.Sprintf("ALTER TABLE %s.public.%s ADD COLUMN %s %s;",
-		dc.base.DBName(), tableName, col.Name, dialect_column_type_fmt(tableName, col))
+		dc.base.DBName(), tableName, col.Name, dialectColumnTypeFmt(tableName, col))
 
 	if col.IncrAble {
 		sql += fmt.Sprintf("ALTER TABLE %s.public.%s ALTER COLUMN %s SET DEFAULT nextval('%s');",
@@ -262,7 +262,7 @@ func (dc *DialectModeler) ColumnSet(tableName string, col *modeler.Column) error
 	col.Fix()
 
 	sql := fmt.Sprintf("ALTER TABLE %s.public.%s ALTER COLUMN %s TYPE %s;",
-		dc.base.DBName(), tableName, col.Name, dialect_column_type_fmt(tableName, col))
+		dc.base.DBName(), tableName, col.Name, dialectColumnTypeFmt(tableName, col))
 
 	if col.IncrAble {
 		seq_name := "seq_" + tableName + "__" + col.Name
@@ -527,7 +527,7 @@ func (dc *DialectModeler) SchemaSync(newds *modeler.Schema) error {
 				colChange = false
 			)
 
-			dialect_column_type_fix(newcol)
+			dialectColumnTypeFix(newcol)
 
 			for _, curcol := range curTable.Columns {
 
@@ -679,5 +679,5 @@ func (dc *DialectModeler) SchemaDump() (*modeler.Schema, error) {
 }
 
 func (dc *DialectModeler) QuoteStr(str string) string {
-	return dialect_quote + str + dialect_quote
+	return dialectQuote + str + dialectQuote
 }

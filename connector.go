@@ -54,11 +54,11 @@ func NewConnector(cfg connect.ConnOptions) (rdb.Connector, error) {
 	if err != nil {
 		return nil, err
 	}
-	base.BindVar = dialect_stmt_bind_var
-	base.QuoteStr = dialect_quote_str
-	base.TypeDatetimeFmt = dialect_datetime_fmt
+	base.BindVar = dialectStmtBindVar
+	base.QuoteStr = dialectQuoteStr
+	base.TypeDatetimeFmt = dialectDatetimeFmt
 
-	for k, v := range dialect_stmts {
+	for k, v := range dialectStmts {
 		base.StmtSet(k, v)
 	}
 

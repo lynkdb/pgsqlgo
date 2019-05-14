@@ -24,8 +24,8 @@ import (
 )
 
 const (
-	dialect_quote        = `"`
-	dialect_datetime_fmt = "2006-01-02 15:04:05 -0700 MST"
+	dialectQuote       = `"`
+	dialectDatetimeFmt = "2006-01-02 15:04:05 -0700 MST"
 )
 
 // Numeric Types
@@ -47,7 +47,7 @@ const (
 // character(n), char(n)	fixed-length, blank padded
 // text	variable unlimited length
 
-var dialect_column_types = map[string]string{
+var dialectColumnTypes = map[string]string{
 	"bool":            "bool",
 	"string":          "varchar(%v)",
 	"string-text":     "text",
@@ -65,7 +65,7 @@ var dialect_column_types = map[string]string{
 	"float64-decimal": "numeric(%v, %v)",
 }
 
-func dialect_column_type_fix(col *modeler.Column) {
+func dialectColumnTypeFix(col *modeler.Column) {
 
 	if strings.HasPrefix(col.Type, "uint") {
 		col.Type = col.Type[1:]
@@ -77,9 +77,9 @@ func dialect_column_type_fix(col *modeler.Column) {
 	col.Fix()
 }
 
-func dialect_column_type_fmt(table_name string, col *modeler.Column) string {
+func dialectColumnTypeFmt(table_name string, col *modeler.Column) string {
 
-	sql, ok := dialect_column_types[col.Type]
+	sql, ok := dialectColumnTypes[col.Type]
 	if !ok {
 		return col.Type
 	}
@@ -104,22 +104,23 @@ func dialect_column_type_fmt(table_name string, col *modeler.Column) string {
 	return sql
 }
 
-var dialect_stmts = map[string]string{
+var dialectStmts = map[string]string{
 	"insertIgnore": "INSERT INTO %s (%s) VALUES (%s) ON CONFLICT DO NOTHING", // >= v9.5
 }
 
-func dialect_stmt_bind_var(sql string, num int) string {
+func dialectStmtBindVar(sql string, num int) string {
 	for i := 1; i <= num; i++ {
 		sql = strings.Replace(sql, "?", "$"+strconv.Itoa(i), 1)
 	}
 	return sql
 }
 
-func dialect_quote_str(name string) string {
-	if name == "*" {
+func dialectQuoteStr(name string) string {
+	if name == "*" ||
+		strings.HasPrefix(strings.ToUpper(name), "COUNT(") {
 		return name
 	}
-	return dialect_quote + name + dialect_quote
+	return dialectQuote + name + dialectQuote
 }
 
 type Dialect struct {
@@ -138,7 +139,7 @@ func (dc *Dialect) Modeler() (modeler.Modeler, error) {
 }
 
 func (dc *Dialect) QuoteStr(str string) string {
-	return dialect_quote + str + dialect_quote
+	return dialectQuote + str + dialectQuote
 }
 
 func (dc *Dialect) NewFilter() rdb.Filter {

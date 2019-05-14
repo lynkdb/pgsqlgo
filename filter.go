@@ -135,12 +135,12 @@ func (fr *Filter) Parse() (where string, params []interface{}) {
 					res = append(res, "?")
 				}
 
-				where += fmt.Sprintf("%s IN (%s) ", dialect_quote_str(p.exprs[0]), strings.Join(res, ","))
+				where += fmt.Sprintf("%s IN (%s) ", dialectQuoteStr(p.exprs[0]), strings.Join(res, ","))
 				params = append(params, p.args...)
 
 			} else {
 
-				where += fmt.Sprintf("%s %s ", dialect_quote_str(p.exprs[0]), operator)
+				where += fmt.Sprintf("%s %s ", dialectQuoteStr(p.exprs[0]), operator)
 				params = append(params, p.args[0])
 			}
 		}

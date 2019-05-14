@@ -25,6 +25,7 @@ type Queryer struct {
 	cols   string
 	table  string
 	order  string
+	group  string
 	limit  int64
 	offset int64
 	where  rdb.Filter
@@ -53,6 +54,11 @@ func (q *Queryer) Order(s string) rdb.Queryer {
 	return q
 }
 
+func (q *Queryer) Group(s string) rdb.Queryer {
+	q.group = s
+	return q
+}
+
 func (q *Queryer) Limit(num int64) rdb.Queryer {
 	q.limit = num
 	return q
@@ -71,7 +77,7 @@ func (q *Queryer) Parse() (sql string, params []interface{}) {
 
 	cols := strings.Split(q.cols, ",")
 	for i, v := range cols {
-		cols[i] = dialect_quote_str(v)
+		cols[i] = dialectQuoteStr(v)
 	}
 
 	sql = fmt.Sprintf("SELECT %s FROM %s ", strings.Join(cols, ","), q.table)
@@ -84,6 +90,10 @@ func (q *Queryer) Parse() (sql string, params []interface{}) {
 
 	if len(q.order) > 0 {
 		sql += "ORDER BY " + q.order + " "
+	}
+
+	if len(q.group) > 0 {
+		sql += "GROUP BY " + q.group + " "
 	}
 
 	if q.offset > 0 {
