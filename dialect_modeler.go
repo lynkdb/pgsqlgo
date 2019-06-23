@@ -219,17 +219,32 @@ func (dc *DialectModeler) ColumnSync(tableName string, col *modeler.Column) erro
 		dc.base.ExecRaw(fmt.Sprintf("CREATE SEQUENCE %s;", seq_name))
 	}
 
-	sql := fmt.Sprintf("ALTER TABLE %s.public.%s ADD COLUMN %s %s;",
+	sql := fmt.Sprintf("ALTER TABLE %s.public.%s ADD COLUMN %s %s",
 		dc.base.DBName(), tableName, col.Name, dialectColumnTypeFmt(tableName, col))
+
+	if !col.IncrAble {
+
+		if col.IsChar() {
+			if col.NotNullAble {
+				sql += " SET NOT NULL"
+			}
+		}
+
+		if col.Default != "" {
+			sql += fmt.Sprintf(" DEFAULT '%s'", col.Default)
+		}
+	}
+	sql += ";"
 
 	if col.IncrAble {
 		sql += fmt.Sprintf("ALTER TABLE %s.public.%s ALTER COLUMN %s SET DEFAULT nextval('%s');",
 			dc.base.DBName(), tableName, col.Name, seq_name)
 	}
 
+	/**
 	if !col.IncrAble {
 
-		if !col.NullAble {
+		if col.NotNullAble {
 			sql += fmt.Sprintf("ALTER TABLE %s.public.%s ALTER COLUMN %s SET NOT NULL;",
 				dc.base.DBName(), tableName, col.Name)
 		}
@@ -239,6 +254,7 @@ func (dc *DialectModeler) ColumnSync(tableName string, col *modeler.Column) erro
 				dc.base.DBName(), tableName, col.Name, col.Default)
 		}
 	}
+	*/
 
 	//fmt.Println("ColumnSync", sql)
 
@@ -272,7 +288,7 @@ func (dc *DialectModeler) ColumnSet(tableName string, col *modeler.Column) error
 	}
 
 	if !col.IncrAble {
-		if !col.NullAble {
+		if col.IsChar() && col.NotNullAble {
 			sql += fmt.Sprintf("ALTER TABLE %s.public.%s ALTER COLUMN %s SET NOT NULL;",
 				dc.base.DBName(), tableName, col.Name)
 		}
@@ -333,8 +349,10 @@ func (dc *DialectModeler) ColumnDump(tableName string) ([]*modeler.Column, error
 				col.Name = content
 
 			case "is_nullable":
-				if "YES" == content {
-					col.NullAble = true
+				if "YES" != content {
+					col.NotNullAble = true
+				} else {
+					col.NotNullAble = false
 				}
 
 			case "column_default":
@@ -391,7 +409,7 @@ func (dc *DialectModeler) ColumnDump(tableName string) ([]*modeler.Column, error
 		}
 
 		if strings.HasPrefix(col.Type, "int") {
-			col.NullAble = true
+			col.NotNullAble = false
 		}
 
 		if col.Type == "float64-decimal" {
@@ -539,7 +557,7 @@ func (dc *DialectModeler) SchemaSync(newds *modeler.Schema) error {
 
 				if newcol.Type != curcol.Type ||
 					newcol.Length != curcol.Length ||
-					newcol.NullAble != curcol.NullAble ||
+					newcol.NotNullAble != curcol.NotNullAble ||
 					newcol.IncrAble != curcol.IncrAble ||
 					newcol.Default != curcol.Default {
 					colChange = true
