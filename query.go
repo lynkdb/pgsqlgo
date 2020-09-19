@@ -71,16 +71,16 @@ func (q *Queryer) Offset(num int64) rdb.Queryer {
 
 func (q *Queryer) Parse() (sql string, params []interface{}) {
 
-	if len(q.table) == 0 {
-		return
-	}
-
 	cols := strings.Split(q.cols, ",")
 	for i, v := range cols {
 		cols[i] = dialectQuoteStr(v)
 	}
 
-	sql = fmt.Sprintf("SELECT %s FROM %s ", strings.Join(cols, ","), q.table)
+	sql = fmt.Sprintf("SELECT %s ", strings.Join(cols, ","))
+
+	if q.table != "" {
+		sql += fmt.Sprintf("FROM %s ", q.table)
+	}
 
 	frsql, ps := q.Where().Parse()
 	if len(ps) > 0 {

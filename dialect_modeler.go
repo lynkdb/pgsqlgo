@@ -226,7 +226,7 @@ func (dc *DialectModeler) ColumnSync(tableName string, col *modeler.Column) erro
 
 		if col.IsChar() {
 			if col.NotNullAble {
-				sql += " SET NOT NULL"
+				sql += " NOT NULL"
 			}
 		}
 
@@ -289,7 +289,7 @@ func (dc *DialectModeler) ColumnSet(tableName string, col *modeler.Column) error
 
 	if !col.IncrAble {
 		if col.IsChar() && col.NotNullAble {
-			sql += fmt.Sprintf("ALTER TABLE %s.public.%s ALTER COLUMN %s SET NOT NULL;",
+			sql += fmt.Sprintf("ALTER TABLE %s.public.%s ALTER COLUMN %s NOT NULL;",
 				dc.base.DBName(), tableName, col.Name)
 		}
 

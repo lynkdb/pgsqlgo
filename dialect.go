@@ -109,11 +109,47 @@ var dialectStmts = map[string]string{
 	"insertIgnore": "INSERT INTO %s (%s) VALUES (%s) ON CONFLICT DO NOTHING", // >= v9.5
 }
 
-func dialectStmtBindVar(sql string, num int) string {
-	for i := 1; i <= num; i++ {
-		sql = strings.Replace(sql, "?", "$"+strconv.Itoa(i), 1)
+var dialectAllowFuncs = map[string]bool{
+	"COUNT":   true,
+	"SUM":     true,
+	"LENGTH":  true,
+	"MIN":     true,
+	"MAX":     true,
+	"MOD":     true,
+	"NEXTVAL": true,
+	"CURRVAL": true,
+	"SETVAL":  true,
+	"LASTVAL": true,
+}
+
+func dialectStmtBindVar(sql string, vars []interface{}) (string, []interface{}) {
+	var (
+		num = 0
+		rs  []interface{}
+	)
+	for _, v := range vars {
+		if vf := dialectStmtBindVarFunc(v); vf != "" {
+			sql = strings.Replace(sql, "?", vf, 1)
+		} else {
+			num += 1
+			sql = strings.Replace(sql, "?", "$"+strconv.Itoa(num), 1)
+			rs = append(rs, v)
+		}
 	}
-	return sql
+	return sql, rs
+}
+
+func dialectStmtBindVarFunc(val interface{}) string {
+	switch val.(type) {
+	case string:
+		vs := val.(string)
+		if n := strings.IndexByte(vs, '('); n > 0 {
+			if dialectAllowFuncs[strings.ToUpper(vs[:n])] {
+				return vs
+			}
+		}
+	}
+	return ""
 }
 
 func dialectQuoteStr(name string) string {
@@ -124,8 +160,7 @@ func dialectQuoteStr(name string) string {
 
 	if n := strings.IndexByte(name, '('); n > 0 {
 		upName := strings.ToUpper(name)
-		if upName[:n] == "COUNT" ||
-			upName[:n] == "SUM" {
+		if dialectAllowFuncs[upName[:n]] {
 			return name
 		}
 	}
