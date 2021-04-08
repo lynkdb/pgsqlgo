@@ -53,6 +53,11 @@ func NewFilter() rdb.Filter {
 	return &Filter{}
 }
 
+func (fr *Filter) Reset() rdb.Filter {
+	fr.params = []filterItem{}
+	return fr
+}
+
 func (fr *Filter) And(expr string, args ...interface{}) rdb.Filter {
 
 	if expr == "" || len(args) == 0 {
